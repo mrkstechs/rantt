@@ -1,0 +1,37 @@
+version: '3'
+services:
+  server:
+    container_name: rantt_server
+    image: node:latest
+    working_dir: /app
+    ports:
+      - 3000:3000
+    environment:
+      - PGUSER=rantter
+      - PGPASSWORD=toprantter
+      - PGDATABASE=rantt
+      - PGHOST=db
+      - PGPORT=5432
+    volumes:
+      - type: bind
+        source: ./server
+        target: /app
+    depends_on:
+      - db
+    command: bash -c "npm i && npm run dev"
+
+  db:
+    container_name: rantt_db
+    image: postgres:12.4
+    environment:
+      - POSTGRES_USER=rantter
+      - POSTGRES_PASSWORD=toprantter
+      - POSTGRES_DB=rantt
+    volumes:
+      - "./server/db/migrations:/docker-entrypoint-initdb.d/:ro"
+      - "dbdata:/var/lib/postgresql/data"
+volumes:
+  dbdata:
+networks: 
+  default:
+    name: rantt
